@@ -1,0 +1,406 @@
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "CoolExecutor"
+gui.ResetOnSpawn = false
+gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 450, 0, 400)
+frame.Position = UDim2.new(0.5, -225, 0.5, -200)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.BorderSizePixel = 4
+frame.BorderColor3 = Color3.fromRGB(255, 0, 0)
+frame.Parent = gui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.5, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "bl1ss executor fe"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 28
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+local decompileButton = Instance.new("TextButton")
+decompileButton.Size = UDim2.new(0.25, -5, 0, 40)
+decompileButton.Position = UDim2.new(0.5, 5, 0, 0)
+decompileButton.Text = "Decompile"
+decompileButton.Font = Enum.Font.SourceSansBold
+decompileButton.TextSize = 22
+decompileButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+decompileButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+decompileButton.BorderSizePixel = 2
+decompileButton.BorderColor3 = Color3.fromRGB(255, 0, 0)
+decompileButton.Parent = frame
+
+local adminButton
+= Instance.new("TextButton")
+adminButton.Size = UDim2.new(0.25, -5, 0, 40)
+adminButton.Position = UDim2.new(0.75, 5, 0, 0)
+adminButton.Text = "Admin"
+adminButton.Font = Enum.Font.SourceSansBold
+adminButton.TextSize = 22
+adminButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+adminButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+adminButton.BorderSizePixel = 2
+adminButton.BorderColor3 = Color3.fromRGB(255, 0, 0)
+adminButton.Parent = frame
+
+local codeContainer = Instance.new("Frame")
+codeContainer.Size = UDim2.new(1, -20, 0, 100)
+codeContainer.Position = UDim2.new(0, 10, 0, 50)
+codeContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+codeContainer.BorderSizePixel = 2
+codeContainer.BorderColor3 = Color3.fromRGB(255, 0, 0)
+codeContainer.Parent = frame
+
+local codeDisplayLabel = Instance.new("TextLabel")
+codeDisplayLabel.Size = UDim2.new(1, 0, 1, 0)
+codeDisplayLabel.Position = UDim2.new(0, 0, 0, 0)
+codeDisplayLabel.BackgroundTransparency = 1
+codeDisplayLabel.TextWrapped = true
+codeDisplayLabel.TextXAlignment = Enum.TextXAlignment.Left
+codeDisplayLabel.TextYAlignment = Enum.TextYAlignment.Top
+codeDisplayLabel.Font = Enum.Font.Code
+codeDisplayLabel.TextSize = 18
+codeDisplayLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+codeDisplayLabel.RichText = true
+codeDisplayLabel.Parent = codeContainer
+
+
+local textbox = Instance.new("TextBox")
+textbox.Size = UDim2.new(1, 0, 1, 0)
+textbox.Position = UDim2.new(0, 0, 0, 0)
+textbox.TextWrapped = true
+textbox.TextXAlignment = Enum.TextXAlignment.Left
+textbox.TextYAlignment = Enum.TextYAlignment.Top
+textbox.ClearTextOnFocus = false
+textbox.MultiLine = true
+textbox.Font = Enum.Font.Code
+textbox.TextSize = 18
+textbox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textbox.BackgroundTransparency = 1
+textbox.TextTransparency = 1
+textbox.BorderSizePixel = 0
+textbox.Parent = codeContainer
+
+local KEYWORD_COLORS = {
+    ["local"] = "#00A0FF",
+    ["function"] = "#00A0FF",
+    ["return"] = "#00A0FF",
+    
+    ["if"] = "#FF8000",
+    ["then"] = "#FF8000",
+    ["else"] = "#FF8000",
+    ["elseif"] = "#FF8000",
+    ["end"] = "#FF8000",
+    ["for"] = "#FF8000",
+    ["in"] = "#FF8000",
+    ["do"] = "#FF8000",
+    ["while"] = "#FF8000",
+    ["repeat"] = "#FF8000",
+    ["until"] = "#FF8000",
+
+    ["game"] = "#00FF00",
+    ["Instance"] = "#00FF00",
+    ["workspace"] = "#00FF00",
+    ["script"] = "#00FF00",
+
+    ["nil"] = "#FF00FF",
+    ["true"] = "#FF00FF",
+    ["false"] = "#FF00FF",
+}
+
+local function applySyntaxHighlighting(rawCode)
+    local highlightedCode = rawCode
+    
+    for keyword, hexColor in pairs(KEYWORD_COLORS) do
+        
+        highlightedCode = highlightedCode:gsub(
+            "(%f[%w_])" .. keyword .. "(%f[^%w_])", 
+            '%1<font color="' .. hexColor .. '">' .. keyword .. '</font>%2'
+        )
+    end
+    
+    highlightedCode = highlightedCode:gsub(
+        "(--[^\n]*)", 
+        '<font color="#808080">%1</font>'
+    )
+
+    highlightedCode = highlightedCode:gsub("\n", "<br/>")
+
+    return highlightedCode
+end
+
+textbox:GetPropertyChangedSignal("Text"):Connect(function()
+    codeDisplayLabel.Text = applySyntaxHighlighting(textbox.Text)
+end)
+
+codeDisplayLabel.Text = applySyntaxHighlighting(textbox.Text)
+
+
+local outputBox = Instance.new("ScrollingFrame")
+outputBox.Size = UDim2.new(1, -20, 0, 160)
+outputBox.Position = UDim2.new(0, 10, 0, 160)
+outputBox.CanvasSize = UDim2.new(0, 0, 0, 0)
+outputBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+outputBox.BorderSizePixel =
+2
+outputBox.BorderColor3 = Color3.fromRGB(255, 0, 0)
+outputBox.ScrollBarThickness = 8
+outputBox.AutomaticCanvasSize = Enum.AutomaticSize.Y
+outputBox.AutomaticSize = Enum.AutomaticSize.None
+outputBox.Parent = frame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = outputBox
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 2)
+
+local function logOutput(text, color)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -10, 0, 20)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.Code
+    label.TextSize = 16
+    label.TextColor3 = color or Color3.new(1, 1, 1)
+    label.Text = text
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextWrapped = false
+    label.Parent = outputBox
+    task.wait()
+    
+    outputBox.CanvasPosition = Vector2.new(0, outputBox.AbsoluteCanvasSize.Y)
+end
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 120, 0, 40)
+button.Position = UDim2.new(1, -130, 1, -52)
+button.Text = "Execute"
+button.Font = Enum.Font.SourceSansBold
+button.TextSize = 22
+button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+button.TextColor3 = Color3.fromRGB(100, 100, 100)
+button.BorderSizePixel = 2
+button.BorderColor3 = Color3.fromRGB(255, 0, 0)
+button.AutoButtonColor = false
+button.Active = false
+button.Parent = frame
+
+local injectButton = Instance.new("TextButton")
+injectButton.Size = UDim2.new(0, 120, 0, 40)
+injectButton.Position = UDim2.new(0, 10, 1, -52)
+injectButton.Text = "Inject "
+injectButton.Font = Enum.Font.SourceSansBold
+injectButton.TextSize = 22
+injectButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+injectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+injectButton.BorderSizePixel = 2
+injectButton.BorderColor3 = Color3.fromRGB(255, 0, 0)
+injectButton.Parent = frame
+
+local eraseButton = Instance.new("TextButton")
+eraseButton.Size = UDim2.new(0, 120, 0, 40)
+eraseButton.Position = UDim2.new(0.5, -60, 1, -52)
+eraseButton.Text = "Erase"
+eraseButton.Font = Enum.Font.SourceSansBold
+eraseButton.TextSize = 22
+eraseButton.BackgroundColor3 = Color3.fromRGB(0,
+0, 0)
+eraseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+eraseButton.BorderSizePixel = 2
+eraseButton.BorderColor3 = Color3.fromRGB(255, 0, 0)
+eraseButton.Parent = frame
+
+local injected = false
+injectButton.MouseButton1Click:Connect(function()
+    if injected then return end
+    injected = true
+    injectButton.Text = "Injecting..."
+    injectButton.TextColor3 = Color3.fromRGB(255, 255, 0)
+    wait(1)
+    injectButton.Text = "Injected!"
+    injectButton.TextColor3 = Color3.fromRGB(0, 255, 0)
+    button.Active = true
+    button.AutoButtonColor = true
+    button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    wait(0.5)
+    local LigmaProject = Instance.new("ScreenGui")
+		local ImageLabel = Instance.new("ImageLabel")
+		local fr6 = Instance.new("TextButton")
+		local TextLabel_2 = Instance.new("TextLabel")
+	
+		LigmaProject.Name = "LigmaProject"
+		LigmaProject.Parent = game.CoreGui
+	
+		ImageLabel.Parent = LigmaProject
+		ImageLabel.Active = true
+		ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		ImageLabel.BackgroundTransparency = 1.000
+		ImageLabel.Position = UDim2.new(-0.127000004, 0, 0.407999992, 0)
+		ImageLabel.Size = UDim2.new(0, 90, 0, 90)
+		ImageLabel.Image = "rbxassetid://119444522513465"
+	
+		fr6.Name = "fr6"
+		fr6.Parent = ImageLabel
+		fr6.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		fr6.BackgroundTransparency = 1.000
+		fr6.Position = UDim2.new(0, 0, -0.633333325, 0)
+		fr6.Size = UDim2.new(0, 90, 0, 50)
+		fr6.Font = Enum.Font.SourceSansBold
+		fr6.Text = "R15 -> R6"
+		fr6.TextColor3 = Color3.fromRGB(0, 0, 0)
+		fr6.TextScaled = true
+		fr6.TextSize = 18.000
+		fr6.TextTransparency = 1.000
+		fr6.TextWrapped = true
+	
+		TextLabel_2.Parent = ImageLabel
+		TextLabel_2.Active = true
+		TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TextLabel_2.BackgroundTransparency = 1.000
+		TextLabel_2.Position = UDim2.new(0.99999994, 0, 0, 0)
+		TextLabel_2.Size = UDim2.new(0, 269, 0, 90)
+		TextLabel_2.Font = Enum.Font.SourceSansBold
+		TextLabel_2.LineHeight = 1.100
+		TextLabel_2.Text = "Project bl1ss by team bliss                                                                   Run unresticted scripts using FE!                                                                                  Status: Injected"
+		TextLabel_2.TextColor3 = Color3.fromRGB(0, 0, 0)
+		TextLabel_2.TextScaled = true
+		TextLabel_2.TextSize = 15.000
+		TextLabel_2.TextTransparency = 1.000
+		TextLabel_2.TextWrapped = true
+	
+		local function UpdateVisibilityBasedOnRigType()
+			local TweenService = game:GetService("TweenService")
+			local txt = ImageLabel.TextLabel
+			local btn = fr6
+			wait(1)
+			ImageLabel:TweenPosition(UDim2.new(0.458, 0, 0.408, 0), "Out", "Linear", 0.4, false)
+			wait(3)
+			ImageLabel:TweenPosition(UDim2.new(0.01, 0, 0.813, 0), "Out", "Sine", 0.7, false)
+			wait(1)
+			TweenService:Create(txt, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {["BackgroundTransparency"] = 0}):Play()
+			TweenService:Create(txt, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {["TextTransparency"] = 0}):Play()
+	
+			for i, v in pairs(game.Players:GetPlayers()) do
+				if v.Character and v.Character:FindFirstChild("Humanoid") then
+					if v.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 then
+						btn.Visible = false
+					elseif v.Character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+						TweenService:Create(btn, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {["BackgroundTransparency"] = 0}):Play()
+						TweenService:Create(btn, TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {["TextTransparency"] = 0}):Play()
+						btn.Visible = true
+					end
+				end
+			end
+	
+			wait(2)
+	
+			while wait() do
+				for i, v in pairs(game.Players:GetPlayers()) do
+					if v.Character and v.Character:FindFirstChild("Humanoid") then
+						if v.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 then
+							btn.Visible = false
+						elseif v.Character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+							btn.Visible = true
+						end
+					end
+				end
+			end
+		end
+	
+		fr6.MouseButton1Click:Connect(function()
+			local player = game.Players.LocalPlayer
+			if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+				if player.Character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+					fr6.Visible = false
+					loadstring(game:HttpGet("https://pastebin.com/raw/9wJepMwY", true))()
+				end
+			end
+		end)
+	
+		game.Players.PlayerAdded:Connect(function(player)
+			player.CharacterAdded:Connect(function(character)
+				local btn = fr6
+				btn.Visible = true
+			end)
+		end)
+	
+		UpdateVisibilityBasedOnRigType()
+
+end)
+
+button.MouseButton1Click:Connect(function()
+    if not injected then return end
+ 
+   local code = textbox.Text
+    local func, err = loadstring(code)
+    if func then
+        local env = getfenv(func)
+        env.print = function(...)
+            local args = {...}
+            local text = table.concat(args, " ")
+            logOutput("[OUTPUT] " .. text, Color3.fromRGB(255, 255, 255))
+        end
+ 
+       env.warn = function(...)
+            local args = {...}
+            local text = table.concat(args, " ")
+            logOutput("[WARN] " .. text, Color3.fromRGB(255, 255, 0))
+        end
+        setfenv(func, env)
+        local success, result = pcall(func)
+        if not success then
+ 
+           logOutput("[ERROR] " .. tostring(result), Color3.fromRGB(255, 0, 0))
+        end
+    else
+        logOutput("[LOAD ERROR] " .. tostring(err), Color3.fromRGB(255, 0, 0))
+    end
+end)
+
+eraseButton.MouseButton1Click:Connect(function()
+    textbox.Text = ""
+end)
+
+decompileButton.MouseButton1Click:Connect(function()
+    if not injected then
+        logOutput("[ERROR] You must inject before decompiling.", Color3.fromRGB(255, 0, 0))
+        return
+    end
+    logOutput("[INFO] Loading Dex Decompiler...", Color3.fromRGB(0, 255, 255))
+ 
+   local success, result = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/peyton2465/Dex/master/out.lua"))()
+    end)
+    if success then
+        logOutput("[SUCCESS] Dex loaded successfully.", Color3.fromRGB(0, 255, 0))
+    else
+        logOutput("[ERROR] Failed to load Dex: " .. tostring(result), Color3.fromRGB(255, 0, 0))
+    end
+end)
+
+adminButton.MouseButton1Click:Connect(function()
+    if not injected then
+        logOutput("[ERROR] You must inject before running admin.", Color3.fromRGB(255, 0, 0))
+        return
+    
+    end
+    logOutput("[INFO] Loading Infinite Yield...", Color3.fromRGB(0, 255, 255))
+    local success, result = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end)
+    if success then
+        logOutput("[SUCCESS] Admin loaded successfully.", Color3.fromRGB(0, 255, 0))
+    else
+        logOutput("[ERROR] Failed to load Admin: " .. tostring(result), Color3.fromRGB(255, 0, 0))
+    end
+end)
+
+frame.Active = true
+frame.Draggable = true
+
