@@ -1,0 +1,166 @@
+--[[
+Made By | @Teambald
+Note | Please leave this credit if you will use in your guis this script!!
+Warning | Btw this is a remake from a script made by itsKittyyyGD :}
+Credits | credits to itsKittyyyGD him created the original script!
+]]
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local tool
+
+for _,v in player:GetDescendants() do
+	if v.Name == "SyncAPI" then tool = v.Parent end
+end
+for _,v in game.ReplicatedStorage:GetDescendants() do
+	if v.Name == "SyncAPI" then tool = v.Parent end
+end
+
+local remote = tool.SyncAPI.ServerEndpoint
+local function _(args)
+	remote:InvokeServer(unpack(args))
+end
+
+function CreatePart(cf,parent)
+	_( {"CreatePart","Normal",cf,parent} )
+end
+function SetAnchor(b,p)
+	_( {"SyncAnchor",{{Part=p,Anchored=b}}} )
+end
+function SetCollision(p,b)
+	_( {"SyncCollision",{{Part=p,CanCollide=b}}} )
+end
+function Resize(p,s,cf)
+	_( {"SyncResize",{{Part=p,Size=s,CFrame=cf}}} )
+end
+function MovePart(p,cf)
+	_( {"SyncMove",{{Part=p,CFrame=cf}}} )
+end
+function AddMesh(p)
+	_( {"CreateMeshes",{{Part=p}}} )
+end
+function SetMesh(p,id)
+	_( {"SyncMesh",{{Part=p,MeshId="rbxassetid://"..id}}} )
+end
+function MeshResize(p,s)
+	_( {"SyncMesh",{{Part=p,Scale=s}}} )
+end
+function SetColor(p,c)
+	_( {"SyncColor",{{Part=p,Color=c,UnionColoring=false}}} )
+end
+function SpawnDecal(p,face)
+	_( {"CreateTextures",{{Part=p,Face=face,TextureType="Decal"}}} )
+end
+function AddDecal(p,id,face)
+	_( {"SyncTexture",{{Part=p,Face=face,TextureType="Decal",Texture="rbxassetid://"..id}}} )
+end
+function DestroyPart(p)
+	_( {"Remove",{p}} )
+end
+
+local cloud
+
+local function CreateCloud()
+	local head = char:WaitForChild("Head")
+	local cf = head.CFrame + Vector3.new(0,6,0)
+	CreatePart(cf,workspace)
+
+	task.wait(0.15)
+
+	for _,v in workspace:GetChildren() do
+		if v:IsA("BasePart") and (v.Position - cf.Position).Magnitude < 1 then
+			cloud = v
+			SetAnchor(true,v)
+			SetCollision(v,false)
+			SetColor(v,BrickColor.new(333).Color)
+			AddMesh(v)
+			SetMesh(v,"111820358")
+			MeshResize(v,Vector3.new(8,8,8))
+			break
+		end
+	end
+end
+
+CreateCloud()
+
+RunService.RenderStepped:Connect(function()
+	if cloud and char:FindFirstChild("Head") then
+		MovePart(cloud,char.Head.CFrame + Vector3.new(0,6,0))
+	end
+end)
+
+local RunService = game:GetService("RunService")
+local debris = {}
+
+task.spawn(function()
+	while task.wait(0.05) do
+		if not cloud then continue end
+
+		for j = 1,2 do  -- Generar dos gotas por iteración
+			local offset = Vector3.new(
+				math.random(-1,1),
+				-1,
+				math.random(-1,1)
+			)
+
+			local spawnCF = cloud.CFrame + offset
+			CreatePart(spawnCF, workspace)
+			task.wait(0.01)
+
+			for _, p in workspace:GetChildren() do
+				if p:IsA("BasePart") 
+				and (p.Position - spawnCF.Position).Magnitude < 0.5 then
+
+					SetAnchor(true, p)
+					SetCollision(p, false)
+					Resize(p, Vector3.new(1.2,1.2,0.2), p.CFrame)
+
+					SpawnDecal(p, Enum.NormalId.Front)
+					AddDecal(p, "331959655", Enum.NormalId.Front)
+					SpawnDecal(p, Enum.NormalId.Back)
+					AddDecal(p, "331959655", Enum.NormalId.Back)
+
+					local relativeOffset = p.Position - cloud.Position
+
+					
+					debris[p] = {lastPos = p.Position, timer = 0}
+
+					-- Movimiento descendente que sigue la nube
+					task.spawn(function()
+						for i = 1, 25 do
+							if cloud then
+								MovePart(p, cloud.CFrame + relativeOffset - Vector3.new(0, 0.6*i, 0))
+							end
+							task.wait(0.03)
+						end
+						DestroyPart(p)
+						debris[p] = nil
+					end)
+
+					break
+				end
+			end
+		end
+	end
+end)
+
+RunService.RenderStepped:Connect(function(delta)
+	for part, info in pairs(debris) do
+		if part and part.Parent then
+			if (part.Position - info.lastPos).Magnitude < 0.01 then
+				info.timer = info.timer + delta
+				if info.timer >= 0.9 then
+					DestroyPart(part)
+					debris[part] = nil
+				end
+			else
+				info.timer = 0
+				info.lastPos = part.Position
+			end
+		else
+			debris[part] = nil
+		end
+	end
+end)
