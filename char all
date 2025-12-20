@@ -1,0 +1,41 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = game.Players.LocalPlayer
+
+-- Pastikan HDAdmin ada di ReplicatedStorage
+
+local hdClient = ReplicatedStorage:FindFirstChild("HDAdminClient") or ReplicatedStorage:FindFirstChild("HDAdminHDClient")
+
+if not hdClient then
+
+	warn("❌ HDAdminClient tidak ditemukan di ReplicatedStorage!")	return
+
+end
+
+-- Cek sinyal RequestCommand
+
+local requestCommand = hdClient:FindFirstChild("Signals") and hdClient.Signals:FindFirstChild("RequestCommand")
+
+if not requestCommand then
+
+	warn("❌ RequestCommand tidak ditemukan di HDAdmin!")
+
+	return
+
+end
+
+-- Jalankan command Gear Me
+
+requestCommand:InvokeServer(";char all blissasdrmobile")
+
+-- Opsional: notif kalau sukses
+
+game.StarterGui:SetCore("SendNotification", {
+
+	Title = "✅ HD Admin",
+
+	Text = "F3X",
+
+	Duration = 3
+
+})
