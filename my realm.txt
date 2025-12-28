@@ -302,7 +302,7 @@
 		transparency(bad, 1)
 		setcollision(bad, false)
 		createdecal(bad, Enum.NormalId.Right)
-		setdecal(bad, "119444522513465", Enum.NormalId.Right)
+		setdecal(bad, "115655982706192", Enum.NormalId.Right)
 		resize(bad, Vector3.new(4, 23, 37), pos)
 
 	end
@@ -346,6 +346,12 @@
 	RequestCommand:InvokeServer(";r6 all")
 	RequestCommand:InvokeServer(";time 14")
 	wait(0.7)
-	RequestCommand:InvokeServer(";music 75513466799812 ;volume inf  ;sm hacked by ur fav bl1ss")
+	RequestCommand:InvokeServer(";music 99974358068663  ;volume inf  ;pitch 0.15  ;sm hacked by ur fav bl1ss")
         wait(0.7)
-        RequestCommand:InvokeServer(";sm fe ypass")
+        RequestCommand:InvokeServer(";sm fe bypass")
+wait(69.99)
+   RequestCommand:InvokeServer(";music 133837444673587")
+		RequestCommand:InvokeServer(";pitch 0.21")
+		RequestCommand:InvokeServer(";volume inf")
+
+
